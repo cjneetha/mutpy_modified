@@ -282,7 +282,8 @@ class AccReportView:
                                 'killer' :killer,
                                 'tests_run' :tests_run,
                                 'exception_traceback':exception_traceback})
-            
+
+            print('WRITING to mutations')
             with open(f"/temp/mutations/mutations.pickle", 'wb') as f:
                 pickle.dump(all_killed_mutations , f)
     
