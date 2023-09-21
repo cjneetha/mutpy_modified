@@ -14,7 +14,6 @@ import pickle
 
 
 all_killed_mutations = []
-FUNCTION_NAME = ''
 
 class ViewNotifier:
     PREFIX = 'notify_'
@@ -145,45 +144,16 @@ class TextView(QuietTextView):
                                                                                                              exception.__class__.__name__,
                                                                                                              exception))
         
-    @staticmethod
-    def _get_line_number(diff):
-         # ADDED to get the line number    
-        for line in diff:
-            if line.startswith('-'):
-                return int(re.sub(' +',' ', line.split(':')[0]).split(' ')[1])    
-        return None
-        
-    @staticmethod
-    def get_function_name(src_code, line_number):
-        module = ast.parse(src_code)
-
-        for node in module.body:
-            if isinstance(node, ast.FunctionDef):
-                last_line_of_function = max(
-                (f.lineno for f in ast.walk(node) if hasattr(f, 'lineno')),
-                default=node.lineno
-            )
-                if node.lineno <= line_number <= last_line_of_function:
-                    return node.name
-
-        return None
+   
 
     def print_code(self, mutant, original):
         #breakpoint()
         mutant_src = codegen.to_source(mutant)
         original_src = codegen.to_source(original)
-          
         mutant_src_wth_linenum = codegen.add_line_numbers(mutant_src)
         original_src_wth_linenum = codegen.add_line_numbers(original_src)
-
-        diff = self._create_diff(mutant_src_wth_linenum, original_src_wth_linenum)
-        diff = [line for line in diff if not line.startswith(('---', '+++', '@@'))]
-        
-        line_num = self._get_line_number(diff)
-        FUNCTION_NAME = self.get_function_name(original_src, line_number=line_num)
-    
         self._print_diff(mutant_src_wth_linenum, original_src_wth_linenum)
-        print('\n\n[FUNCTION_NAME]:\n\n', FUNCTION_NAME, '\n\n')
+        
 
     def _print_diff(self, mutant_src, original_src):
         diff = self._create_diff(mutant_src, original_src)
@@ -236,12 +206,51 @@ class AccReportView:
         self.tests = tests
         self.number_of_tests = number_of_tests
 
+
+
+    @staticmethod
+    def _get_line_number(diff):
+         # ADDED to get the line number    
+        for line in diff:
+            if line.startswith('-'):
+                return int(re.sub(' +',' ', line.split(':')[0]).split(' ')[1])    
+        return None
+        
+    @staticmethod
+    def get_function_name(src_code, line_number):
+        module = ast.parse(src_code)
+
+        for node in module.body:
+            if isinstance(node, ast.FunctionDef):
+                last_line_of_function = max(
+                (f.lineno for f in ast.walk(node) if hasattr(f, 'lineno')),
+                default=node.lineno
+            )
+                if node.lineno <= line_number <= last_line_of_function:
+                    return node.name
+        return None
+    
+    
     def mutation(self, number, mutations, module, mutant):
         mutations = [{'operator': mutation.operator.name(), 'lineno': mutation.node.lineno} for mutation in mutations]
+        # get the cource and mutation code
+        src_code = codegen.to_source(ast.parse(inspect.getsource(module)))
+        mutation_code = codegen.to_source(mutant)
+        
+        original_src_wth_linenum = codegen.add_line_numbers(src_code)
+        mutant_src_wth_linenum = codegen.add_line_numbers(mutation_code)
+        
+        diff = TextView._create_diff(mutant_src_wth_linenum, original_src_wth_linenum)
+        diff = [line for line in diff if not line.startswith(('---', '+++', '@@'))]
+        
+        line_num = self._get_line_number(diff)
+        function_name = self.get_function_name(src_code, line_number=line_num)
+        
         self.current_mutation = {
             'number': number,
             'mutations': mutations,
             'module': module,
+            'function_name': function_name
         }
 
     def killed(self, time, killer, exception_traceback, tests_run, *args, **kwargs):
@@ -261,6 +270,8 @@ class AccReportView:
 
     def timeout(self, time, *args, **kwargs):
         self.end_mutation('timeout', time=time)
+        
+   
 
     def end_mutation(self, status, time=None, killer=None, tests_run=None, exception_traceback=None, function_name=None):
         self.current_mutation['status'] = status
@@ -272,19 +283,18 @@ class AccReportView:
             self.current_mutation['function_name']
         self.mutation_info.append(self.current_mutation)
         
-        if status == 'killed':
+        if status == 'killed' and str(self.current_mutation['function_name']):
             all_killed_mutations.append({'number': int(self.current_mutation['number']),
                                 'mutations': str(self.current_mutation['mutations']),
                                 'module': str(self.current_mutation['module']),
                                 'status':str(status),
-                                'function_name': FUNCTION_NAME,
+                                'function_name': str(self.current_mutation['function_name']),
                                 'time' :time,
                                 'killer' :killer,
                                 'tests_run' :tests_run,
                                 'exception_traceback':exception_traceback})
-
-            print('WRITING to mutations')
-            with open(f"/temp/mutations/mutations.pickle", 'wb') as f:
+            
+            with open(f"/tmp/NEETHA/mutations.pickle", 'wb') as f:
                 pickle.dump(all_killed_mutations , f)
     
 
