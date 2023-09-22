@@ -25,6 +25,16 @@ for py_file in py_files:
     test_folder = 'test'
     if not path.exists('test'):
         test_folder = 'tests'
+        if not path.exists(test_folder):
+            test_folder = path.join(proj,'test')
+            if not path.exists(test_folder):
+                test_folder = path.join(proj,'tests')
+                if not path.exists(test_folder):
+                    print('test folder not found')
+            
+    test_folder.replace('/', '.')
+    print(test_folder)
+    
     test_files = listdir(test_folder)
     for test in test_files:
         if not test.endswith('.py') or test.startswith('__'):
