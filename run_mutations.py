@@ -1,7 +1,7 @@
-from os import listdir, chdir
+from os import listdir, chdir, path, remove
 import subprocess
 import argparse
-
+import shutil
 
 argparser = argparse.ArgumentParser()
 argparser.add_argument("--proj-folder", type=str, default='')
@@ -24,10 +24,13 @@ for py_file in py_files:
             continue
         py_file = py_file.replace(".py", "")
         test = test.replace(".py", "")
-        cmd = ["mut.py", "--target", f"{proj}.{py_file}", "--unit-test", f"test.{test}", "--debug", "--quiet"]
+        cmd = ["mut.py", "--target", f"{proj}.{py_file}", "--unit-test", f"test.{test}", "--debug"]
+        print(" ".join(cmd))
         try:
             process = subprocess.run(cmd, check=True, capture_output=False)
-
+            if path.isfile("/temp/mutations/mutations.pickle"): 
+                shutil.move("/temp/mutations/mutations.pickle", f"/temp/mutations/mutations_{proj}_{py_file}_{test}.pickle")
+                remove("/temp/mutations/mutations.pickle")
         except:
             continue
         
