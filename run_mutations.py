@@ -22,7 +22,7 @@ for py_file in py_files:
     test_folder = 'test'
     if not path.exists('test'):
         test_folder = 'tests'
-    test_files = listdir('test')
+    test_files = listdir(test_folder)
     for test in test_files:
         if not test.endswith('.py') or test.startswith('__'):
             continue
