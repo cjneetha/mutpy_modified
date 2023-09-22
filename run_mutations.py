@@ -5,9 +5,12 @@ import shutil
 
 argparser = argparse.ArgumentParser()
 argparser.add_argument("--proj-folder", type=str, default='')
+argparser.add_argument("--test-framework", type=str, default='')
+
 arguments = argparser.parse_args()
 
 chdir(arguments.proj_folder)
+test_framework = arguments.test_framework
 
 proj = arguments.proj_folder.split('/')[-1]
 if proj == 'youtube-dl':
@@ -28,7 +31,7 @@ for py_file in py_files:
             continue
         py_file = py_file.replace(".py", "")
         test = test.replace(".py", "")
-        cmd = ["mut.py", "--target", f"{proj}.{py_file}", "--unit-test", f"{test_folder}.{test}", "--debug"]
+        cmd = ["mut.py", "--target", f"{proj}.{py_file}", "--unit-test", f"{test_folder}.{test}", "--debug", "--runner", test_framework]
         print(" ".join(cmd))
         try:
             process = subprocess.run(cmd, check=True, capture_output=False)
