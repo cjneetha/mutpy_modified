@@ -20,7 +20,7 @@ for py_file in py_files:
         continue
 
     test_folder = 'test'
-    if not os.path.exists('test'):
+    if not path.exists('test'):
         test_folder = 'tests'
     test_files = listdir('test')
     for test in test_files:
