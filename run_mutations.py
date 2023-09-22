@@ -32,10 +32,11 @@ for py_file in py_files:
                 if not path.exists(test_folder):
                     print('test folder not found')
             
-    test_folder = test_folder.replace('/', '.')
     print(test_folder)
     
     test_files = listdir(test_folder)
+    test_folder = test_folder.replace('/', '.')
+    
     for test in test_files:
         if not test.endswith('.py') or test.startswith('__'):
             continue
