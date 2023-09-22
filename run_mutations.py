@@ -28,7 +28,7 @@ for py_file in py_files:
             continue
         py_file = py_file.replace(".py", "")
         test = test.replace(".py", "")
-        cmd = ["mut.py", "--target", f"{proj}.{py_file}", "--unit-test", f"test.{test}", "--debug"]
+        cmd = ["mut.py", "--target", f"{proj}.{py_file}", "--unit-test", f"{test_folder}.{test}", "--debug"]
         print(" ".join(cmd))
         try:
             process = subprocess.run(cmd, check=True, capture_output=False)
