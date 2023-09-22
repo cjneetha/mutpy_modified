@@ -32,7 +32,7 @@ for py_file in py_files:
                 if not path.exists(test_folder):
                     print('test folder not found')
             
-    test_folder.replace('/', '.')
+    test_folder = test_folder.replace('/', '.')
     print(test_folder)
     
     test_files = listdir(test_folder)
