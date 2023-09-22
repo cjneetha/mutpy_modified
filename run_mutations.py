@@ -18,6 +18,10 @@ py_files = listdir(proj)
 for py_file in py_files:
     if not py_file.endswith('.py') or py_file.startswith('__'):
         continue
+
+    test_folder = 'test'
+    if not os.path.exists('test'):
+        test_folder = 'tests'
     test_files = listdir('test')
     for test in test_files:
         if not test.endswith('.py') or test.startswith('__'):
