@@ -42,7 +42,8 @@ for py_file in py_files:
             continue
         py_file = py_file.replace(".py", "")
         test = test.replace(".py", "")
-        cmd = ["mut.py", "--target", f"{proj}.{py_file}", "--unit-test", f"{test_folder}.{test}", "--debug", "--runner", test_framework, "--mutation-number", "1"]
+        cmd = ["mut.py", "--target", f"{proj}.{py_file}", "--unit-test", f"{test_folder}.{test}", "--debug",
+               "--runner", test_framework, "--mutation-number", "1", "-m"]
         print(" ".join(cmd))
         try:
             process = subprocess.run(cmd, check=True, capture_output=False)
